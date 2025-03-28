@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/api";
 
 const ReviewPrototype = () => {
-  const { id } = useParams(); // Get prototype ID from URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const [prototype, setPrototype] = useState(null);
   const [feedback, setFeedback] = useState("");
@@ -23,16 +23,15 @@ const ReviewPrototype = () => {
     }
   };
 
-  const handleReview = async (approved) => {
-    if (!feedback) {
+  const handleReview = async () => {
+    if (!feedback.trim()) {
       alert("Please provide feedback before submitting.");
       return;
     }
 
     try {
       await api.post(`prototypes/${id}/review_prototype/`, {
-        approved,
-        feedback,
+        feedback, // No need to send 'approved' since it's always true
       });
 
       alert("Review submitted successfully.");
@@ -51,13 +50,12 @@ const ReviewPrototype = () => {
       <p><strong>Title:</strong> {prototype.title}</p>
       <p><strong>Abstract:</strong> {prototype.abstract}</p>
       <p><strong>Student:</strong> {prototype.student_email}</p>
-      <p><strong>Approval Status:</strong> {prototype.approved === null ? "Pending ⏳" : prototype.approved ? "Approved ✅" : "Rejected ❌"}</p>
+      <p><strong>Approval Status:</strong> {prototype.approved === null ? "Pending ⏳" : "Approved ✅"}</p>
 
       <label>Feedback:</label>
       <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} required />
 
-      <button onClick={() => handleReview(true)}>Approve</button>
-      <button onClick={() => handleReview(false)}>Reject</button>
+      <button onClick={handleReview}>Submit Feedback</button>
       <button onClick={() => navigate("/dashboard")}>Cancel</button>
     </div>
   );

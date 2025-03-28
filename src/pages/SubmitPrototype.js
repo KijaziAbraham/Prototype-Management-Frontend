@@ -111,7 +111,7 @@ const SubmitPrototype = () => {
     }
 
     attachments.forEach((file) => {
-      formData.append("attachments[]", file);
+      formData.append("attachments[]", file);   // attachnents are passed as array (multiple) choosing more than one file
     });
 
     console.log("Submitting Prototype Data:");
@@ -136,7 +136,7 @@ const SubmitPrototype = () => {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <p>Loading...</p>;  // loading state, we can put good css here 
   }
 
   return (
@@ -210,3 +210,4 @@ const SubmitPrototype = () => {
 };
 
 export default SubmitPrototype;
+

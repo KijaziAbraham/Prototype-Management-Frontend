@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login";
+import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
 import SubmitPrototype from "./pages/SubmitPrototype";
 import EditPrototype from "./pages/EditPrototype";

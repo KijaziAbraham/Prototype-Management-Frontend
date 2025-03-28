@@ -149,7 +149,7 @@ const Dashboard = () => {
                 <strong>{proto.title}</strong>
                 <p>Barcode: {proto.barcode || "Not Assigned"}</p>
                 <p>Storage Location: {proto.storage_location || "Not Assigned"}</p>
-                <p><strong>Status:</strong> {proto.approved === null ? "Pending ⏳" : proto.approved ? "Approved ✅" : "Rejected ❌"}</p>
+                <p><strong>Status:</strong> {proto.approved === null ? "Pending ⏳" : "Approved ✅"}</p>
 
                 {/* Student Edit Own Prototypes */}
                 {userRole === "student" && proto.student_id === userId && (
