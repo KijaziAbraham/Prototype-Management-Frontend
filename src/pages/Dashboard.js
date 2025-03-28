@@ -149,8 +149,9 @@ const Dashboard = () => {
                 <strong>{proto.title}</strong>
                 <p>Barcode: {proto.barcode || "Not Assigned"}</p>
                 <p>Storage Location: {proto.storage_location || "Not Assigned"}</p>
-                <p><strong>Status:</strong> {proto.approved === null ? "Pending ⏳" : "Approved ✅"}</p>
-
+                <p><strong>Status:</strong> {proto.approved === null ? "Pending ⏳" : "Approved ✅"}</p> 
+        // always approved since the project submitted in sys are those already approved
+        //but we should change this later to hande the function necessary tutazo ambiwa
                 {/* Student Edit Own Prototypes */}
                 {userRole === "student" && proto.student_id === userId && (
                   <button onClick={() => navigate(`/edit-prototype/${proto.id}`)}>Edit Prototype</button>
