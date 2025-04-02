@@ -168,11 +168,18 @@ const SubmitPrototype = () => {
 
         <label>Supervisor:</label>
         <select value={supervisor} onChange={(e) => setSupervisor(e.target.value)} required>
-          <option value="">Select Supervisor</option>
-          {supervisors.map((sup) => (
-            <option key={sup.id} value={sup.id}>{sup.name}</option>
-          ))}
-        </select>
+        <option value="">Select Supervisor</option>
+        {supervisors.length > 0 ? (
+          supervisors.map((sup) => (
+            <option key={sup.id} value={sup.id}>
+             {sup.username ? `${sup.username} - ${sup.email}` : sup.email}           
+            </option>
+          ))
+        ) : (
+          <option disabled>No supervisors found</option>
+        )}
+      </select>
+
 
         <label>Attachments:</label>
         <input type="file" multiple onChange={handleFileChange} />
@@ -195,7 +202,7 @@ const SubmitPrototype = () => {
             <select value={selectedStudent} onChange={(e) => setSelectedStudent(e.target.value)} required>
               <option value="">Select Student</option>
               {students.map((student) => (
-                <option key={student.id} value={student.id}>{student.email}</option>
+                <option key={student.id} value={student.id}>  {student.username ? `${student.username} - ${student.email}` : student.email} </option>
               ))}
             </select>
           </>

@@ -54,7 +54,7 @@ const Dashboard = () => {
     }
   };
 
-  const fetchStorageLocations = async () => {
+const fetchStorageLocations = async () => {
     try {
       const response = await api.get("prototypes/storage_locations/");
       setStorageLocations(response.data || []);
@@ -98,10 +98,13 @@ const Dashboard = () => {
 
       {/* Display Logged-in User Info */}
       {user && (
-        <div style={{ marginBottom: "15px", padding: "10px", border: "1px solid #ddd", borderRadius: "5px" }}>
-          <p><strong>Logged in as:</strong> {user.name} ({userRole})</p>
-        </div>
-      )}
+  <div style={{ marginBottom: "15px", padding: "10px", border: "1px solid #ddd", borderRadius: "5px" }}>
+    <p><strong>Logged in as:</strong> {user.name} ({userRole})</p>
+    <button onClick={() => navigate("/profile")} style={{ marginRight: "10px" }}>Profile</button>
+    <button onClick={() => navigate("/settings")}>Settings</button>
+  </div>
+)}
+
 
       {/* Admin Actions */}
       {userRole === "admin" && (
@@ -129,14 +132,18 @@ const Dashboard = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      <select value={storageFilter} onChange={(e) => setStorageFilter(e.target.value)}>
-        <option value="">All Locations</option>
-        {storageLocations.map((location, index) => (
-          <option key={index} value={location}>
-            {location}
-          </option>
-        ))}
-      </select>
+<select value={storageFilter} onChange={(e) => setStorageFilter(e.target.value)}>
+    <option value="">All Locations</option>
+    {storageLocations.length > 0 ? (
+        storageLocations.map((location, index) => (
+            <option key={index} value={location}>
+                {location}
+            </option>
+        ))
+    ) : (
+        <option disabled>No locations found</option>
+    )}
+</select>
 
       {/* Prototype List */}
       {loading ? (
@@ -149,7 +156,9 @@ const Dashboard = () => {
                 <strong>{proto.title}</strong>
                 <p>Barcode: {proto.barcode || "Not Assigned"}</p>
                 <p>Storage Location: {proto.storage_location || "Not Assigned"}</p>
-                <p><strong>Status:</strong> {proto.approved === null ? "Pending ⏳" : "Approved ✅"}</p>
+                <p><strong>Status:</strong>{" "}{proto.status === "submitted_not_reviewed"  ? "Submitted (Not Reviewed)"  : "Submitted (Reviewed)"}</p>
+               { /* always approved since the project submitted in sys are those already approved
+                but we should change this later to hande the function necessary tutazo ambiwa */}
 
                 {/* Student Edit Own Prototypes */}
                 {userRole === "student" && proto.student_id === userId && (
