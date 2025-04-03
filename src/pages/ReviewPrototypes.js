@@ -30,9 +30,19 @@ const ReviewPrototype = () => {
     }
 
     try {
-      await api.post(`prototypes/${id}/review_prototype/`, {
-        feedback, // No need to send 'approved' since it's always true
-      });
+      // Ensure the correct content type and pass the feedback
+      await api.post(
+        `prototypes/${id}/review_prototype/`,
+        {
+          feedback, // Send only feedback here
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json', // Set the correct content type
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Include JWT token for authorization
+          }
+        }
+      );
 
       alert("Review submitted successfully.");
       navigate("/dashboard");
@@ -49,8 +59,8 @@ const ReviewPrototype = () => {
       <h2>Review Prototype</h2>
       <p><strong>Title:</strong> {prototype.title}</p>
       <p><strong>Abstract:</strong> {prototype.abstract}</p>
-      <p><strong>Student:</strong> {prototype.student_email}</p>
-      <p><strong>Approval Status:</strong> {prototype.approved === null ? "Pending ⏳" : "Approved ✅"}</p>
+      <p><strong>Student:</strong> {prototype.student?.email || "N/A"}</p>
+      <p><strong>Approval Status:</strong> {prototype.status === "submitted_not_reviewed" ? "Submitted (Not Reviewed)" : "Submitted (Reviewed)"}</p>
 
       <label>Feedback:</label>
       <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} required />

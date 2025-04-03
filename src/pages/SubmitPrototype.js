@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 const SubmitPrototype = () => {
   const [title, setTitle] = useState("");
   const [abstract, setAbstract] = useState("");
-  const [attachments, setAttachments] = useState([]);
   const [hasPhysicalPrototype, setHasPhysicalPrototype] = useState(false);
   const [students, setStudents] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -15,40 +14,37 @@ const SubmitPrototype = () => {
   const [selectedStudent, setSelectedStudent] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
+  const [report, setReport] = useState(null);
+  const [sourceCode, setSourceCode] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchUser();
-    fetchStudents();
-    fetchDepartments();
-    fetchSupervisors();
   }, []);
 
-  const fetchUser = async () => {
-    const token = localStorage.getItem("access_token");
-    if (!token) return alert("No access token found!");
+  useEffect(() => {
+    if (userRole === "admin") {
+      fetchStudents();
+    }
+    fetchDepartments();
+    fetchSupervisors();
+  }, [userRole]);
 
+  const fetchUser = async () => {
     try {
-      const response = await api.get("user/profile/", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get("user/profile/");
       setUserRole(response.data.role);
-      setLoading(false);
+      setUserId(response.data.id);
     } catch (error) {
       console.error("Error fetching user role:", error);
-      setLoading(false);
     }
   };
 
   const fetchStudents = async () => {
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
-
     try {
-      const response = await api.get("users/students/", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get("users/students/");
       setStudents(response.data);
     } catch (error) {
       console.error("Error fetching students:", error);
@@ -56,13 +52,8 @@ const SubmitPrototype = () => {
   };
 
   const fetchDepartments = async () => {
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
-
     try {
-      const response = await api.get("departments/", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get("departments/");
       setDepartments(response.data);
     } catch (error) {
       console.error("Error fetching departments:", error);
@@ -70,85 +61,55 @@ const SubmitPrototype = () => {
   };
 
   const fetchSupervisors = async () => {
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
-
     try {
-      const response = await api.get("users/supervisors/", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get("users/supervisors/");
       setSupervisors(response.data);
     } catch (error) {
       console.error("Error fetching supervisors:", error);
     }
   };
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    setAttachments((prev) => [...prev, ...files]);
-    e.target.value = ""; // Reset file input after selection
-  };
-
-  const removeAttachment = (index) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("access_token");
-    if (!token) return alert("You need to log in first!");
-
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("abstract", abstract);
-    formData.append("has_physical_prototype", hasPhysicalPrototype);
-    formData.append("department", selectedDepartment);  
-    formData.append("academic_year", academicYear);
-    formData.append("supervisor", supervisor);
-
-    if (userRole === "admin" && selectedStudent) {
-      formData.append("student", selectedStudent);
-    }
-
-    attachments.forEach((file) => {
-      formData.append("attachments[]", file);   // attachnents are passed as array (multiple) choosing more than one file
-    });
-
-    console.log("Submitting Prototype Data:");
-    for (let pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
+    setLoading(true);
 
     try {
-      await api.post("prototypes/", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("abstract", abstract);
+      formData.append("has_physical_prototype", hasPhysicalPrototype);
+      formData.append("department", selectedDepartment);
+      formData.append("academic_year", academicYear);
+      formData.append("supervisor", supervisor);
+      
+      if (report) formData.append("attachment.report", report);
+      if (sourceCode) formData.append("attachment.source_code", sourceCode);
+
+      formData.append("student", userRole === "admin" ? selectedStudent : userId);
+
+      const response = await api.post("prototypes/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      alert("Prototype submitted successfully!");
+
+      alert(`Prototype submitted successfully! ID: ${response.data.id}`);
       navigate("/dashboard");
     } catch (error) {
       console.error("Error submitting prototype:", error);
-      console.error("Server response:", error.response?.data);
-      alert(error.response?.data?.detail || "Failed to submit prototype.");
+      alert("Error submitting prototype: " + JSON.stringify(error.response?.data, null, 2));
     }
+    setLoading(false);
   };
-
-  if (loading) {
-    return <p>Loading...</p>;  // loading state, we can put good css here 
-  }
 
   return (
     <div>
       <h2>{userRole === "admin" ? "Add Prototype (Admin)" : "Submit New Prototype"}</h2>
       <form onSubmit={handleSubmit}>
         <label>Title:</label>
-        <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-        
+        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
+
         <label>Abstract:</label>
-        <textarea placeholder="Abstract" value={abstract} onChange={(e) => setAbstract(e.target.value)} required />
-        
+        <textarea value={abstract} onChange={(e) => setAbstract(e.target.value)} required />
+
         <label>Department:</label>
         <select value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)} required>
           <option value="">Select Department</option>
@@ -158,43 +119,26 @@ const SubmitPrototype = () => {
         </select>
 
         <label>Academic Year:</label>
-        <input
-          type="text"
-          placeholder="e.g. 2024/2025"
-          value={academicYear}
-          onChange={(e) => setAcademicYear(e.target.value)}
-          required
-        />
+        <input type="text" value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} required />
 
         <label>Supervisor:</label>
         <select value={supervisor} onChange={(e) => setSupervisor(e.target.value)} required>
-        <option value="">Select Supervisor</option>
-        {supervisors.length > 0 ? (
-          supervisors.map((sup) => (
-            <option key={sup.id} value={sup.id}>
-             {sup.username ? `${sup.username} - ${sup.email}` : sup.email}           
-            </option>
-          ))
-        ) : (
-          <option disabled>No supervisors found</option>
-        )}
-      </select>
-
-
-        <label>Attachments:</label>
-        <input type="file" multiple onChange={handleFileChange} />
-        <ul>
-          {attachments.map((file, index) => (
-            <li key={index}>
-              {file.name} <button type="button" onClick={() => removeAttachment(index)}>Remove</button>
-            </li>
+          <option value="">Select Supervisor</option>
+          {supervisors.map((sup) => (
+            <option key={sup.id} value={sup.id}>{sup.username || sup.email}</option>
           ))}
-        </ul>
-        
+        </select>
+
         <label>
           <input type="checkbox" checked={hasPhysicalPrototype} onChange={(e) => setHasPhysicalPrototype(e.target.checked)} />
           Has Physical Prototype?
         </label>
+
+        <label>Report:</label>
+        <input type="file" accept=".pdf,.doc,.docx" onChange={(e) => setReport(e.target.files[0] || null)} />
+
+        <label>Source Code:</label>
+        <input type="file" accept=".zip,.rar" onChange={(e) => setSourceCode(e.target.files[0] || null)} />
 
         {userRole === "admin" && (
           <>
@@ -202,7 +146,7 @@ const SubmitPrototype = () => {
             <select value={selectedStudent} onChange={(e) => setSelectedStudent(e.target.value)} required>
               <option value="">Select Student</option>
               {students.map((student) => (
-                <option key={student.id} value={student.id}>  {student.username ? `${student.username} - ${student.email}` : student.email} </option>
+                <option key={student.id} value={student.id}>{student.username || student.email}</option>
               ))}
             </select>
           </>
@@ -217,4 +161,3 @@ const SubmitPrototype = () => {
 };
 
 export default SubmitPrototype;
-

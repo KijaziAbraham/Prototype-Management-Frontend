@@ -54,7 +54,7 @@ const Dashboard = () => {
     }
   };
 
-const fetchStorageLocations = async () => {
+  const fetchStorageLocations = async () => {
     try {
       const response = await api.get("prototypes/storage_locations/");
       setStorageLocations(response.data || []);
@@ -98,13 +98,12 @@ const fetchStorageLocations = async () => {
 
       {/* Display Logged-in User Info */}
       {user && (
-  <div style={{ marginBottom: "15px", padding: "10px", border: "1px solid #ddd", borderRadius: "5px" }}>
-    <p><strong>Logged in as:</strong> {user.name} ({userRole})</p>
-    <button onClick={() => navigate("/profile")} style={{ marginRight: "10px" }}>Profile</button>
-    <button onClick={() => navigate("/settings")}>Settings</button>
-  </div>
-)}
-
+        <div style={{ marginBottom: "15px", padding: "10px", border: "1px solid #ddd", borderRadius: "5px" }}>
+          <p><strong>Logged in as:</strong> {user.name} ({userRole})</p>
+          <button onClick={() => navigate("/profile")} style={{ marginRight: "10px" }}>Profile</button>
+          <button onClick={() => navigate("/settings")}>Settings</button>
+        </div>
+      )}
 
       {/* Admin Actions */}
       {userRole === "admin" && (
@@ -132,18 +131,18 @@ const fetchStorageLocations = async () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-<select value={storageFilter} onChange={(e) => setStorageFilter(e.target.value)}>
-    <option value="">All Locations</option>
-    {storageLocations.length > 0 ? (
-        storageLocations.map((location, index) => (
+      <select value={storageFilter} onChange={(e) => setStorageFilter(e.target.value)}>
+        <option value="">All Locations</option>
+        {storageLocations.length > 0 ? (
+          storageLocations.map((location, index) => (
             <option key={index} value={location}>
-                {location}
+              {location}
             </option>
-        ))
-    ) : (
-        <option disabled>No locations found</option>
-    )}
-</select>
+          ))
+        ) : (
+          <option disabled>No locations found</option>
+        )}
+      </select>
 
       {/* Prototype List */}
       {loading ? (
@@ -156,12 +155,10 @@ const fetchStorageLocations = async () => {
                 <strong>{proto.title}</strong>
                 <p>Barcode: {proto.barcode || "Not Assigned"}</p>
                 <p>Storage Location: {proto.storage_location || "Not Assigned"}</p>
-                <p><strong>Status:</strong>{" "}{proto.status === "submitted_not_reviewed"  ? "Submitted (Not Reviewed)"  : "Submitted (Reviewed)"}</p>
-               { /* always approved since the project submitted in sys are those already approved
-                but we should change this later to hande the function necessary tutazo ambiwa */}
+                <p><strong>Status:</strong> {proto.status === "submitted_not_reviewed" ? "Submitted (Not Reviewed)" : "Submitted (Reviewed)"}</p>
 
                 {/* Student Edit Own Prototypes */}
-                {userRole === "student" && proto.student_id === userId && (
+                {userRole === "student" && proto.student === userId && (
                   <button onClick={() => navigate(`/edit-prototype/${proto.id}`)}>Edit Prototype</button>
                 )}
 
@@ -179,6 +176,9 @@ const fetchStorageLocations = async () => {
                 {userRole === "staff" && (
                   <button onClick={() => navigate(`/review-prototype/${proto.id}`)}>Review Prototype</button>
                 )}
+
+                {/* View button to navigate to the prototype view page */}
+                <button onClick={() => navigate(`/prototypes/${proto.id}`)}>View Prototype</button>
               </li>
             ))
           ) : (

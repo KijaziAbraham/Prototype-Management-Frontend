@@ -9,6 +9,8 @@ import ReviewPrototypes from "./pages/ReviewPrototypes";
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import ChangePassword from './pages/ChangePassword';
+import ViewPrototype from './pages/ViewPrototype';
+
 const PrivateRoute = ({ element }) => {
   const token = localStorage.getItem("access_token");
   return token ? element : <Navigate to="/" />;
@@ -27,6 +29,8 @@ function App() {
         <Route path="/profile" element={<PrivateRoute element={<Profile />} />} />
         <Route path="/settings" element={<PrivateRoute element={<Settings />} />} />
         <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/prototypes/:id" element={<ViewPrototype />} />
+
 
       </Routes>
     </Router>

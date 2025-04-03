@@ -20,7 +20,6 @@ const EditPrototype = () => {
         setHasPhysicalPrototype(response.data.has_physical_prototype);
         setReport(response.data.report);
         setSourceCode(response.data.source_code);
-
       } catch (error) {
         console.error("Error fetching prototype:", error);
         alert("Failed to load prototype details.");
@@ -33,19 +32,19 @@ const EditPrototype = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-  
+
     formData.append("title", title);
     formData.append("abstract", abstract);
     formData.append("has_physical_prototype", hasPhysicalPrototype);
-  
-    if (report) formData.append("report", report); 
-    if (sourceCode) formData.append("source_code", sourceCode); 
-  
+
+    if (report) formData.append("attachment.report", report);
+    if (sourceCode) formData.append("attachment.source_code", sourceCode);
+
     try {
       await api.patch(`prototypes/${id}/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-  
+
       alert("Prototype updated successfully!");
       navigate("/dashboard");
     } catch (error) {
@@ -53,29 +52,51 @@ const EditPrototype = () => {
       alert("Failed to update prototype.");
     }
   };
-  
 
   return (
     <div>
       <h2>Edit Prototype</h2>
       <form onSubmit={handleUpdate}>
         <label>Title:</label>
-        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
 
         <label>Abstract:</label>
-        <textarea value={abstract} onChange={(e) => setAbstract(e.target.value)} required />
+        <textarea
+          value={abstract}
+          onChange={(e) => setAbstract(e.target.value)}
+          required
+        />
 
         <label>
-          <input type="checkbox" checked={hasPhysicalPrototype} onChange={(e) => setHasPhysicalPrototype(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={hasPhysicalPrototype}
+            onChange={(e) => setHasPhysicalPrototype(e.target.checked)}
+          />
           Has Physical Prototype?
         </label>
 
-      <label>Report:</label>
-      <input type="file" accept=".pdf,.docx" onChange={(e) => setReport(e.target.files[0])} />
+        {/* File input for report */}
+        <label>Report:</label>
+        <input
+          type="file"
+          accept=".pdf,.doc,.docx,.txt,.rtf"
+          onChange={(e) => setReport(e.target.files[0])}
+        />
 
-      <label>Source Code:</label>
-      <input type="file" accept=".zip" onChange={(e) => setSourceCode(e.target.files[0])} />
-   
+        {/* File input for source code */}
+        <label>Source Code:</label>
+        <input
+          type="file"
+          accept=".zip,.rar,.tar,.tar.gz"
+          onChange={(e) => setSourceCode(e.target.files[0])}
+        />
+
         <button type="submit">Update Prototype</button>
       </form>
     </div>
